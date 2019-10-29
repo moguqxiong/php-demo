@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" rel="stylesheet" href="__STATIC__/plugins/layui/css/layui.css">
+    <script rel="script" src="__STATIC__/plugins/layui/layui.js"></script>
+    <style>
+        .header div {
+            border-bottom: #009688 solid 2px;
+            margin-top: 8px;
+        }
+
+        .header span {
+            background: #009688;
+            color: white;
+            margin-left: 30px;
+            padding: 10px;
+        }
+
+        .header button {
+            float: right;
+            margin-right: 30px;
+            margin-top: -5px;
+        }
+    </style>
+</head>
+<body style="padding: 20px">
+<div class="header">
+    <span>角色管理</span>
+    <button class="layui-btn layui-btn-sm" onclick="addRoles()">添加</button>
+    <div></div>
+</div>
+<div>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>名称</th>
+            <th>操作</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        {volist name='list.Roles' id='vo'}
+        <tr>
+
+            <td>{$vo.gid}</td>
+            <td>{$vo.title}</td>
+            <td>
+                <button class="layui-btn layui-btn-xs" onclick="addRoles('{$vo.gid}')">编辑</button>
+                <button class="layui-btn layui-btn-danger layui-btn-xs" onclick="deleteRoles('{$vo.gid}')">删除</button>
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+</div>
+<script>
+    layui.use('layer', function () {
+        $ = layui.jquery;
+        layer = layui.layer;
+    });
+
+    function addRoles($gid) {
+        layer.open({
+            type: 2,
+            title: $gid > 0 ? '编辑角色' : '添加角色',
+            shadeClose: true,
+            shade: 0.8,
+            area: ['480px', '420px'],
+            content: '/admins.php/admins/Roles/add?gid=' + $gid //iframe的url
+        });
+    }
+
+    //删除角色
+    function deleteRoles($gid) {
+        layer.confirm('是否删除当前角色?', {icon: 3, title: '提示'}, function (index) {
+            $.post('/admins.php/admins/Roles/deleteRoles', {gid: $gid}, function (res) {
+                if (res.code > 0) {
+                    layer.alert(res.msg, {icon: 2});
+                } else {
+                    layer.msg(res.msg);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }, 'json');
+            layer.close(index);
+        });
+    }
+</script>
+</body>
+</html>

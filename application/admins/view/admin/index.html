@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员列表</title>
+    <link type="text/css" rel="stylesheet" href="__STATIC__/plugins/layui/css/layui.css">
+    <script rel="script" src="__STATIC__/plugins/layui/layui.js"></script>
+    <style>
+        .header div {
+            border-bottom: #009688 solid 2px;
+            margin-top: 8px;
+        }
+
+        .header span {
+            background: #009688;
+            color: white;
+            margin-left: 30px;
+            padding: 10px;
+        }
+
+        .header button {
+            float: right;
+            margin-right: 30px;
+            margin-top: -5px;
+        }
+    </style>
+</head>
+<body style="padding: 20px">
+
+<div class="header">
+    <span>管理员列表</span>
+    <button class="layui-btn layui-btn-sm" onclick="addUser()">添加</button>
+    <div></div>
+</div>
+<table class="layui-table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>用户名</th>
+        <th>真实姓名</th>
+        <th>角色</th>
+        <th>状态</th>
+        <th>添加时间</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {volist name="data.lists" id="vo"}
+    <tr>
+        <th>{$vo.id}</th>
+        <th>{$vo.username}</th>
+        <th>{$vo.truename}</th>
+        <th>{:isset($data['groups'][$vo.gid])?$data['groups'][$vo.gid]['title']:''}</th>
+        <th>{$vo.status==0?'<span style="color: #5FB878">正常</span>':'<span style="color: red">禁用</span>'}</th>
+        <th>{:date('Y-m-d h-i-s',$vo.addtime)}</th>
+        <th>
+            <button class="layui-btn layui-btn-xs" onclick="editUser('{$vo.id}')">编辑</button>
+            <button class="layui-btn layui-btn-danger layui-btn-xs" onclick="deleteUser('{$vo.id}')">删除</button>
+        </th>
+    </tr>
+    {/volist}
+    </tbody>
+</table>
+
+</body>
+<script>
+    layui.use('layer', function () {
+        var layer = layui.layer;
+        $ = layui.jquery;
+    });
+
+    //添加管理员
+    function addUser() {
+        layer.open({
+            type: 2,
+            title: '添加管理员',
+            shadeClose: true,
+            shade: 0.8,
+            area: ['400px', '50%'],
+            content: '/admins.php/admins/Admin/add' //iframe的url
+        });
+    }
+
+    //编辑管理员
+    function editUser($id) {
+        layer.open({
+            type: 2,
+            title: $id > 0 ? '编辑管理员' : '添加管理员',
+            shadeClose: true,
+            shade: 0.8,
+            area: ['400px', '50%'],
+            content: '/admins.php/admins/Admin/add?id=' + $id //iframe的url
+        })
+    }
+
+    //删除用户
+    function deleteUser($id) {
+        layer.confirm('是否删除当前用户?', {icon: 3, title: '提示'}, function (index) {
+            $.post('/admins.php/admins/Admin/delete', {id: $id}, function (res) {
+                if (res.code > 0) {
+                    layer.alert(res.msg, {icon: 2});
+                } else {
+                    layer.msg(res.msg);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }, 'json');
+            layer.close(index);
+        });
+
+    }
+</script>
+</html>

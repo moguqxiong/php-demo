@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" rel="stylesheet" href="__STATIC__/plugins/layui/css/layui.css">
+    <script rel="script" src="__STATIC__/plugins/layui/layui.js"></script>
+</head>
+<body style="padding: 10px">
+<form class="layui-form">
+    <input hidden value="{$role.gid}">
+    <div class="layui-form-item">
+        <label class="layui-form-label">角色名称</label>
+        <div class="layui-input-block">
+            <input class="layui-input" type="text" name="title" value="{$role.title}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">权限管理</label>
+        {volist name='menus' id='vo'}
+        <div class="layui-input-block">
+            <input type="checkbox" lay-skin="primary" title="{$vo.title}" name="menu[{$vo.mid}]" {:isset($role['rights'])&&$role['rights']&&in_array($vo.mid,$role['rights'])?"checked":""}>
+            <hr>
+            {volist name='vo.children' id='cvo'}
+            <input type="checkbox" lay-skin="primary" title="{$cvo.title}" name="menu[{$cvo.mid}]"
+                   {:isset($role['rights'])&&$role['rights']&&in_array($vo.mid,$role['rights'])?"checked":""}>
+            {/volist}
+        </div>
+        {/volist}
+    </div>
+</form>
+<div class="layui-form-item">
+    <div class="layui-input-block">
+        <button class="layui-btn layui-btn-sm" style="text-align: center" onclick="save();return;">保存</button>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer'], function () {
+        $ = layui.jquery;
+        layer = layui.layer;
+    });
+
+    //保存
+    function save() {
+        var title = $.trim($('input[name="title"]'));
+        if (title == '') {
+            layer.msg('请输入角色名称');
+        } else {
+            $.post('/admins.php/admins/Roles/save', $('form').serialize(), function (e) {
+                if (e.code > 0) {
+                    layer.msg(e.msg, {icon: 2});
+                } else {
+                    layer.msg(e.msg, {icon: 1});
+                    setTimeout(function () {
+                        parent.location.reload();
+                    }, 1000)
+                }
+            }, 'JSON')
+        }
+    }
+</script>
+</body>
+</html>
