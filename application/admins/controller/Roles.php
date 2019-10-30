@@ -20,12 +20,9 @@ class Roles extends BaseAdmin
     public function add()
     {
         $gid = (int)input('get.gid');
-        if ($gid > 0) {
-            $role = $this->db->table('admin_groups')->where(array('gid' => $gid))->item();
-            $role && $role['rights'] && $role['rights'] = json_decode($role['rights']);
-            //dump($role);
-            $this->assign('role', $role);
-        }
+        $role = $this->db->table('admin_groups')->where(array('gid' => $gid))->item();
+        $role && $role['rights'] && $role['rights'] = json_decode($role['rights']);
+        $this->assign('role', $role);
         $menus_list = $this->db->table('admin_menus')->where(array('status' => 0))->cates('mid');
         $menus = $this->geTreeMenuList($menus_list);
         $result = array();
@@ -33,7 +30,6 @@ class Roles extends BaseAdmin
             $value['children'] = isset($value['children']) ? $this->formatMenuList($value['children']) : false;
             $result[] = $value;
         }
-        //dump($result);
         $this->assign('menus', $result);
         return $this->fetch();
     }
@@ -70,6 +66,7 @@ class Roles extends BaseAdmin
 
     public function save()
     {
+        $gid = (int)input('get.gid');
         $data['title'] = trim(input('post.title'));
         $menus = input('post.menu/a');
         if ($data['title'] == '') {
@@ -77,7 +74,13 @@ class Roles extends BaseAdmin
         }
         //合并数组
         $menus && $data['rights'] = json_encode(array_keys($menus));
-        $this->db->table('admin_groups')->insert($data);
+        if ($gid > 0) {
+            $data['gid'] = $gid;
+            $this->db->table('admin_groups')->update($data);
+        } else {
+            $this->db->table('admin_groups')->insert($data);
+        }
+
         exit(json_encode(array('code' => 0, "msg" => '保存成功')));
     }
 

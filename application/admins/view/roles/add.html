@@ -23,7 +23,7 @@
             <hr>
             {volist name='vo.children' id='cvo'}
             <input type="checkbox" lay-skin="primary" title="{$cvo.title}" name="menu[{$cvo.mid}]"
-                   {:isset($role['rights'])&&$role['rights']&&in_array($vo.mid,$role['rights'])?"checked":""}>
+                   {:isset($role['rights'])&&$role['rights']&&in_array($cvo.mid,$role['rights'])?"checked":""}>
             {/volist}
         </div>
         {/volist}
@@ -31,7 +31,8 @@
 </form>
 <div class="layui-form-item">
     <div class="layui-input-block">
-        <button class="layui-btn layui-btn-sm" style="text-align: center" onclick="save();return;">保存</button>
+        <button class="layui-btn layui-btn-sm" style="text-align: center" onclick="save('{$role.gid}');return;">保存
+        </button>
     </div>
 </div>
 <script>
@@ -41,12 +42,12 @@
     });
 
     //保存
-    function save() {
+    function save($gid) {
         var title = $.trim($('input[name="title"]'));
         if (title == '') {
             layer.msg('请输入角色名称');
         } else {
-            $.post('/admins.php/admins/Roles/save', $('form').serialize(), function (e) {
+            $.post('/admins.php/admins/Roles/save?gid=' + $gid, $('form').serialize(), function (e) {
                 if (e.code > 0) {
                     layer.msg(e.msg, {icon: 2});
                 } else {
